@@ -16,10 +16,10 @@ def isVisited(visited, block):
                 and item.xB2 == block.xB2 and item.yB2 == block.yB2 \
                 and item.drt == block.drt and item.currentMap == block.currentMap:
             return True
-        # if item.xB1 == block.xB2 and item.yB1 == block.yB2 \
-        #         and item.xB2 == block.xB1 and item.yB2 == block.yB1 \
-        #         and item.drt == block.drt and item.currentMap == block.currentMap:
-        #     return True
+        if item.xB1 == block.xB2 and item.yB1 == block.yB2 \
+                and item.xB2 == block.xB1 and item.yB2 == block.yB1 \
+                and item.drt == block.drt and item.drt == "SPLIT" and item.currentMap == block.currentMap:
+            return True
     return False
 
 
@@ -219,12 +219,12 @@ class Engine:
         if self.checkBlockAndDoFunc(block):
             if isVisited(visited, block):
                 return
-            pQueue.put((self.distanceToEnd(block), block))
+            pQueue.put((block.costG + self.distanceToEnd(block), block))
 
     def PriorityDistanceFS(self):
         pQueue = pQ()
         visited = []
-        pQueue.put((self.distanceToEnd(self.startBlock), self.startBlock))
+        pQueue.put((self.startBlock.costG + self.distanceToEnd(self.startBlock), self.startBlock))
         self.printer.stat.virtualStep = + 1
 
         while pQueue.not_empty:

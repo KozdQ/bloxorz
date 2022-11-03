@@ -12,6 +12,10 @@ class Block:
         self.yB2 = yB2
         self.drt = drt
         self.selectedSplit = 0
+        if parentNode:
+            self.costG = parentNode.costG + 1
+        else:
+            self.costG = 0
         self.parentNode = parentNode
         self.currentMap = currentMap
         self.keyPress = None

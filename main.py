@@ -15,6 +15,11 @@ from func import Func
 from map import Map
 from stat_info import Stat
 
+sys.setrecursionlimit(0x100000)
+
+START_MAP = 1
+END_MAP = 10
+
 
 def readInput(input_file):
     # open file
@@ -35,11 +40,8 @@ def readInput(input_file):
     return map_row, map_col, row_start, col_start, map_seq, func_seq
 
 
-def mainFunc(map_mode, is_visual, algorithm, processing, engine_list):
-    if processing:
-        engine_list = []
-        is_visual = False
-
+def mainAll(is_visual, engine_list):
+    driver = None
     if is_visual:
         service_object = Service(binary_path)
         driver = webdriver.Chrome(service=service_object)
@@ -64,9 +66,16 @@ def mainFunc(map_mode, is_visual, algorithm, processing, engine_list):
             nextStepProcess = True
 
         if nextStepProcess:
-            if map_mode != "all":
-                if is_visual:
-                    passCode = [i for i in open("passcode.txt").readlines()[int(map_mode) - 1][18:-1]]
+
+            startMain = START_MAP
+            if is_visual:
+                if START_MAP == 1:
+                    pyautogui.click(607, 562)
+                    time.sleep(2)
+                    pyautogui.click(912, 688)
+                    time.sleep(6)
+                else:
+                    passCode = [idx for idx in open("passcode.txt").readlines()[START_MAP - 1][18:-1]]
 
                     pyautogui.click(607, 582)
                     time.sleep(1)
@@ -74,79 +83,23 @@ def mainFunc(map_mode, is_visual, algorithm, processing, engine_list):
                     pyautogui.click(650, 621)
                     time.sleep(6)
 
-                start = int(map_mode)
-                end = start
+            endMain = END_MAP
 
-            else:
-                if is_visual:
-                    pyautogui.click(607, 562)
-                    time.sleep(2)
-                    pyautogui.click(912, 688)
-                    time.sleep(6)
-
-                start = 1
-                end = 10
-
-            for i in range(start):
-                engine_list.append(None)
-
-            for i in range(start, end + 1):
-                if processing:
-                    inputFile = "input/map-{num:02d}.txt".format(num=i)
-
-                    mapRow, mapCol, rowStart, colStart, mapSeq, funcSeq = readInput(inputFile)
-
-                    # SET STAT
-
-                    if algorithm == "DFS":
-                        DFSStat = Stat("DFS Stat")
-                    elif algorithm == "BFS":
-                        BFSStat = Stat("BFS Stat")
-                    elif algorithm == "ASTAR":
-                        ASTARStat = Stat("ASTAR Stat")
-
-                    # SET MAP
-                    srcMap = Map(mapSeq, mapRow, mapCol)
-
-                    # SET FUNCTION MAP
-                    func = Func(funcSeq)
-
-                    # SET BLOCK
-                    block = Block(rowStart, colStart, rowStart, colStart, "STANDING", None, srcMap)
-
-                    # SET ENGINE
-                    engine = Engine(srcMap, func, block)
-
-                    # RUN
-                    if algorithm == "DFS":
-                        engine.printer.stat = DFSStat
-                        engine.DFS()
-                    elif algorithm == "BFS":
-                        engine.printer.stat = BFSStat
-                        engine.BFS()
-                    elif algorithm == "ASTAR":
-                        engine.printer.stat = ASTARStat
-                        engine.PriorityDistanceFS()
-
-                    engine_list.append(engine)
-                    continue
+            for idx in range(startMain, endMain + 1):
 
                 if is_visual:
-                    engine_list[i].printer.doRoad()
+                    engine_list[idx].printer.doRoad()
 
-                    engine_list[i].printer.pressListKey()
-                    if start == end:
+                    engine_list[idx].printer.pressListKey()
+
+                    if startMain == endMain:
                         time.sleep(3)
                     else:
                         time.sleep(6)
 
                 else:
-                    engine_list[i].printer.printRoad()
-                    print(engine_list[i].printer.listKey)
-        if processing:
-            return engine_list
-        else:
-            return None
+                    engine_list[idx].printer.printRoad()
+                    print(engine_list[idx].printer.listKey)
 
     except TimeoutException as ex:
         print(ex)
@@ -155,21 +108,87 @@ def mainFunc(map_mode, is_visual, algorithm, processing, engine_list):
             driver.quit()
 
 
-def doDFS(map_mode, is_visual, algorithm, return_dict):
-    engineListDFS = mainFunc(map_mode, is_visual, algorithm, 1, None)
-    return_dict[0] = engineListDFS
+def oneEngine(idx, alg):
+    inputFile = "input/map-{num:02d}.txt".format(num=idx)
+
+    mapRow, mapCol, rowStart, colStart, mapSeq, funcSeq = readInput(inputFile)
+
+    # SET STAT
+    DFSStat, BFSStat, ASTARStat = None, None, None
+    if alg == "DFS":
+        DFSStat = Stat("DFS Stat")
+    elif alg == "BFS":
+        BFSStat = Stat("BFS Stat")
+    elif alg == "ASTAR":
+        ASTARStat = Stat("ASTAR Stat")
+
+    # SET MAP
+    srcMap = Map(mapSeq, mapRow, mapCol)
+
+    # SET FUNCTION MAP
+    func = Func(funcSeq)
+
+    # SET BLOCK
+    block = Block(rowStart, colStart, rowStart, colStart, "STANDING", None, srcMap)
+
+    # SET ENGINE
+    engine = Engine(srcMap, func, block)
+
+    # RUN
+    if alg == "DFS":
+        engine.printer.stat = DFSStat
+        engine.DFS()
+    elif alg == "BFS":
+        engine.printer.stat = BFSStat
+        engine.BFS()
+    elif alg == "ASTAR":
+        engine.printer.stat = ASTARStat
+        engine.PriorityDistanceFS()
+
+    return engine
 
 
-def doBFS(map_mode, is_visual, algorithm):
-    engineListBFS = mainFunc(map_mode, is_visual, algorithm, 1, None)
-    # if engineListBFS:
-    #     mainFunc(map_mode, is_visual, algorithm, 0, engineListBFS)
+def do(idx, alg, ret_dict):
+    if alg == "DFS":
+        algIdx = 1
+    elif alg == "BFS":
+        algIdx = 2
+    elif alg == "ASTAR":
+        algIdx = 3
+    else:
+        algIdx = 0
+    ret_dict["{i}-{j:02d}".format(i=algIdx, j=idx)] = oneEngine(idx, alg)
 
 
-def doASTAR(map_mode, is_visual, algorithm):
-    engineListASTAR = mainFunc(map_mode, is_visual, algorithm, 1, None)
-    # if engineListASTAR:
-    #     mainFunc(map_mode, is_visual, algorithm, 0, engineListASTAR)
+def getList(alg, ret_dict):
+    if alg == "DFS":
+        algIdx = 1
+    elif alg == "BFS":
+        algIdx = 2
+    elif alg == "ASTAR":
+        algIdx = 3
+    else:
+        algIdx = 0
+    thisList = []
+    for jdx in range(34):
+        thisList.append(ret_dict["{i}-{j:02d}".format(i=algIdx, j=jdx)])
+    return thisList
+
+
+def validate(alg, list_engine, s, e):
+    if alg == "DFS":
+        algIdx = 1
+    elif alg == "BFS":
+        algIdx = 2
+    elif alg == "ASTAR":
+        algIdx = 3
+    else:
+        algIdx = 0
+    for idx in range(s, e + 1):
+        if list_engine[idx] is None:
+            print("TIMEOUT at algIdx", algIdx, ", idx", idx)
+            return False
+    return True
 
 
 if __name__ == '__main__':
@@ -179,23 +198,54 @@ if __name__ == '__main__':
 
     manager = Manager()
     return_dict = manager.dict()
-    return_dict[0] = None
-    return_dict[1] = None
-    return_dict[3] = None
+    for i in range(4):
+        for j in range(34):
+            return_dict["{i}-{j:02d}".format(i=i, j=j)] = None
+    
+    mapMode = mapMode.split(sep="-")
+    if len(mapMode) == 1:
+        if mapMode != "all":
+            START_MAP = int(mapMode[0])
+            END_MAP = START_MAP
 
-    if algorithm == "DFS":
-        dfsThread = Process(target=doDFS, args=(mapMode, isVisual, algorithm, return_dict))
-        dfsThread.start()
-        dfsThread.join(timeout=2)
-        dfsThread.terminate()
-        if return_dict[0]:
-            mainFunc(mapMode, isVisual, algorithm, 0, return_dict[0])
+        else:
+            START_MAP = 1
 
-    elif algorithm == "BFS":
-        pass
-    elif algorithm == "ASTAR":
-        pass
-    elif algorithm == "BEST" and not isVisual:
-        pass
+    elif len(mapMode) == 2:
+        START_MAP = int(mapMode[0])
+        END_MAP = int(mapMode[1])
 
+    else:
+        print("ERROR MAP MODE PARAM")
+        sys.exit()
+
+    start = START_MAP
+    end = END_MAP
+
+    for i in range(start, end + 1):
+        if algorithm in ["DFS", "BFS", "ASTAR"]:
+            thread = Process(target=do, args=(i, algorithm, return_dict))
+            thread.start()
+            thread.join(timeout=3)
+            thread.terminate()
+        elif algorithm == "BEST" and not isVisual:
+            pass
+
+    listEngine = getList(algorithm, return_dict)
+    if validate(algorithm, listEngine, start, end):
+        mainAll(isVisual, listEngine)
+    else:
+        print("Have NONE and replace with DFS")
+        for i in range(start, end + 1):
+            if listEngine[i] is None:
+                thread = Process(target=do, args=(i, "DFS", return_dict))
+                thread.start()
+                thread.join(timeout=3)
+                thread.terminate()
+                if return_dict["{i}-{j:02d}".format(i=1, j=i)] is None:
+                    print("CAN'T SOLVE ALL")
+                    sys.exit()
+                else:
+                    listEngine[i] = return_dict["{i}-{j:02d}".format(i=1, j=i)]
+        mainAll(isVisual, listEngine)
     sys.exit()
