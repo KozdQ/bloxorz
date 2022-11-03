@@ -30,8 +30,8 @@ _**k** dòng tiếp theo_, mỗi dòng bao gồm một dãy số **x_k**, **y_k*
 - **x_k**, **y_k** là vị trí của nút chức năng đó.
 - **num_square** là số lượng viên gạch sẽ xuất hiện hoặc biến mất
 - **x_k_i** và **y_k_i** là vị trí của viên gạch sẽ xuất hiện và biến mất
-- Nút (3, 4, 5, 6, 7, 8) **x_k**, **y_k**, **num_square**, (**x_k_i**, **y_k_i**)*
-- Nút (9) **x_k**, **y_k**, **selected**, **x_1**, **y_1**, **x_2**, **y_2**
+- Nút (3, 4, 5, 6, 7) **x_k**, **y_k**, **num_square**, (**x_k_i**, **y_k_i**)*
+- Nút (8) **x_k**, **y_k**, **selected**, **x_1**, **y_1**, **x_2**, **y_2**
   - **selected** là 1 hoặc 2, sau khi phân tách thì viên 1 hoặc viên 2 sẽ tiếp tục được điều khiển,
   - **x_1**, **y_1**, **x_2**, **y_2** là vị trí của từng viên sau khi bị tách ra.
 

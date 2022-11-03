@@ -16,19 +16,27 @@ class Block:
         self.currentMap = currentMap
         self.keyPress = None
 
+    # Compare self with other block
+    def __lt__(self, block):
+        return True
+
+    def __gt__(self, block):
+        return True
+
     def printBlock(self):
         print(self.xB1, self.yB1, self.xB2, self.yB2, self.drt, self.selectedSplit)
 
     def newCopyMap(self):
         return Map(deepcopy(self.currentMap.mapSeq), self.currentMap.mapRow, self.currentMap.mapCol)
 
-    def split(self, xB1, yB1, xB2, yB2):
+    def splitBlock(self, xB1, yB1, xB2, yB2, selectedSplit):
         self.xB1 = xB1
         self.yB1 = yB1
         self.xB2 = xB2
         self.yB2 = yB2
         self.drt = "SPLIT"
-        self.selectedSplit = 1
+        self.selectedSplit = selectedSplit
+        self.keyPress = self.keyPress + ", WAIT"
 
     def moveUp(self):
         nextBlock = Block(self.xB1, self.yB1, self.xB2, self.yB2, "STANDING", self, self.newCopyMap())
