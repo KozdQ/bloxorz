@@ -47,6 +47,14 @@ class Engine:
             elif currentMapSeq[bXCoord][bYCoord] == 1:
                 currentMapSeq[bXCoord][bYCoord] = 0
 
+        otherSeq = funcSeq[1 + 2 * funcSeq[0]:]
+        if len(otherSeq) > 0:
+            for i in range(otherSeq[0]):
+                value = otherSeq[3 * i + 1]
+                bXCoord = otherSeq[3 * i + 2]
+                bYCoord = otherSeq[3 * i + 3]
+                currentMapSeq[bXCoord][bYCoord] = value
+
     def doOpenButton(self, block, xCoord, yCoord):
         currentMapSeq = block.currentMap.mapSeq
         funcSeq = self.findFuncSeq(xCoord, yCoord)
@@ -57,10 +65,10 @@ class Engine:
                 currentMapSeq[bXCoord][bYCoord] = 1
 
         otherSeq = funcSeq[1 + 2 * funcSeq[0]:]
-        otherPair = len(otherSeq)//2
+        otherPair = len(otherSeq) // 2
         for i in range(otherPair):
-            bXCoord = funcSeq[2 * i + 1]
-            bYCoord = funcSeq[2 * i + 2]
+            bXCoord = otherSeq[2 * i]
+            bYCoord = otherSeq[2 * i + 1]
             currentMapSeq[bXCoord][bYCoord] = 0
 
     def doCloseButton(self, block, xCoord, yCoord):
@@ -75,8 +83,8 @@ class Engine:
         otherSeq = funcSeq[1 + 2 * funcSeq[0]:]
         otherPair = len(otherSeq) // 2
         for i in range(otherPair):
-            bXCoord = funcSeq[2 * i + 1]
-            bYCoord = funcSeq[2 * i + 2]
+            bXCoord = otherSeq[2 * i]
+            bYCoord = otherSeq[2 * i + 1]
             currentMapSeq[bXCoord][bYCoord] = 1
 
     def doSplit(self, block, xCoord, yCoord):
@@ -154,6 +162,7 @@ class Engine:
         while stack:
             currentBlock = stack.pop()
             visited.append(currentBlock)
+            # self.printer.printCurrentMap(currentBlock)
 
             if isGoal(currentBlock):
                 self.printer.endBlock = currentBlock
@@ -165,22 +174,23 @@ class Engine:
             else:
                 if currentBlock.drt != "SPLIT":
                     self.printer.stat.virtualStep += 4
-                    self.move(stack, visited, currentBlock.moveUp())
-                    self.move(stack, visited, currentBlock.moveDown())
                     self.move(stack, visited, currentBlock.moveLeft())
                     self.move(stack, visited, currentBlock.moveRight())
+                    self.move(stack, visited, currentBlock.moveUp())
+                    self.move(stack, visited, currentBlock.moveDown())
+
 
                 else:
                     self.printer.stat.virtualStep += 8
-                    self.move(stack, visited, currentBlock.moveB1Up())
-                    self.move(stack, visited, currentBlock.moveB1Down())
                     self.move(stack, visited, currentBlock.moveB1Left())
                     self.move(stack, visited, currentBlock.moveB1Right())
+                    self.move(stack, visited, currentBlock.moveB1Up())
+                    self.move(stack, visited, currentBlock.moveB1Down())
 
-                    self.move(stack, visited, currentBlock.moveB2Up())
-                    self.move(stack, visited, currentBlock.moveB2Down())
                     self.move(stack, visited, currentBlock.moveB2Left())
                     self.move(stack, visited, currentBlock.moveB2Right())
+                    self.move(stack, visited, currentBlock.moveB2Up())
+                    self.move(stack, visited, currentBlock.moveB2Down())
 
     def BFS(self):
         queue = []
@@ -202,22 +212,23 @@ class Engine:
             else:
                 if currentBlock.drt != "SPLIT":
                     self.printer.stat.virtualStep += 4
-                    self.move(queue, visited, currentBlock.moveUp())
-                    self.move(queue, visited, currentBlock.moveDown())
                     self.move(queue, visited, currentBlock.moveLeft())
                     self.move(queue, visited, currentBlock.moveRight())
+                    self.move(queue, visited, currentBlock.moveUp())
+                    self.move(queue, visited, currentBlock.moveDown())
+
 
                 else:
                     self.printer.stat.virtualStep += 8
-                    self.move(queue, visited, currentBlock.moveB1Up())
-                    self.move(queue, visited, currentBlock.moveB1Down())
                     self.move(queue, visited, currentBlock.moveB1Left())
                     self.move(queue, visited, currentBlock.moveB1Right())
+                    self.move(queue, visited, currentBlock.moveB1Up())
+                    self.move(queue, visited, currentBlock.moveB1Down())
 
-                    self.move(queue, visited, currentBlock.moveB2Up())
-                    self.move(queue, visited, currentBlock.moveB2Down())
                     self.move(queue, visited, currentBlock.moveB2Left())
                     self.move(queue, visited, currentBlock.moveB2Right())
+                    self.move(queue, visited, currentBlock.moveB2Up())
+                    self.move(queue, visited, currentBlock.moveB2Down())
 
     def distanceToEnd(self, block):
         xEndCoord = self.srcMap.endCoord[0]
@@ -255,19 +266,20 @@ class Engine:
             else:
                 if currentBlock.drt != "SPLIT":
                     self.printer.stat.virtualStep += 4
-                    self.moveBest(pQueue, visited, currentBlock.moveUp())
-                    self.moveBest(pQueue, visited, currentBlock.moveDown())
                     self.moveBest(pQueue, visited, currentBlock.moveLeft())
                     self.moveBest(pQueue, visited, currentBlock.moveRight())
+                    self.moveBest(pQueue, visited, currentBlock.moveUp())
+                    self.moveBest(pQueue, visited, currentBlock.moveDown())
+
 
                 else:
                     self.printer.stat.virtualStep += 8
-                    self.moveBest(pQueue, visited, currentBlock.moveB1Up())
-                    self.moveBest(pQueue, visited, currentBlock.moveB1Down())
                     self.moveBest(pQueue, visited, currentBlock.moveB1Left())
                     self.moveBest(pQueue, visited, currentBlock.moveB1Right())
+                    self.moveBest(pQueue, visited, currentBlock.moveB1Up())
+                    self.moveBest(pQueue, visited, currentBlock.moveB1Down())
 
-                    self.moveBest(pQueue, visited, currentBlock.moveB2Up())
-                    self.moveBest(pQueue, visited, currentBlock.moveB2Down())
                     self.moveBest(pQueue, visited, currentBlock.moveB2Left())
                     self.moveBest(pQueue, visited, currentBlock.moveB2Right())
+                    self.moveBest(pQueue, visited, currentBlock.moveB2Up())
+                    self.moveBest(pQueue, visited, currentBlock.moveB2Down())

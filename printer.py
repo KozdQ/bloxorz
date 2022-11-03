@@ -60,11 +60,25 @@ class Printer:
         print()
         print("=========== STAT {num:02d} ============".format(num=idxMap))
         print("STATUS: " + str(self.stat.status))
-        print("RUNNING TIME: " + str(self.stat.runningTime))
+        print("PROCESS TIME: " + str(self.stat.runningTime))
         print("REAL STEP: " + str(self.stat.countStep))
         print("VIRTUAL STEP: " + str(self.stat.virtualStep))
         print("===============================")
         print()
+
+    def printPressKey(self):
+        print("PRESS KEY: ", end="")
+        if len(self.listKey) == 0:
+            print("NONE", end="")
+        else:
+            for i in self.listKey:
+                if i in ["UP", "DOWN", "LEFT", "RIGHT"]:
+                    print(i[0], end="")
+                elif i == "SPACE":
+                    print("-", end="")
+                else:
+                    print("w", end="")
+        print("\n")
 
     def pressListKey(self):
         for i in self.listKey:
@@ -94,9 +108,7 @@ class Printer:
         self.printStat(idxMap)
 
     def doRoadRev(self, currentBlock):
-        if currentBlock is None:
-            self.stat.status = "SUCCESS"
-        else:
+        if currentBlock is not None:
             self.stat.countStep += 1
             self.doRoadRev(currentBlock.parentNode)
             self.doCurrentMap(currentBlock)
@@ -125,9 +137,7 @@ class Printer:
         self.printStat(idxMap)
 
     def printRoadRev(self, currentBlock):
-        if currentBlock is None:
-            self.stat.status = "SUCCESS"
-        else:
+        if currentBlock is not None:
             self.stat.countStep += 1
             self.printRoadRev(currentBlock.parentNode)
             self.printCurrentMap(currentBlock)

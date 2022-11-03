@@ -19,6 +19,7 @@ sys.setrecursionlimit(0x100000)
 
 START_MAP = 1
 END_MAP = 10
+TIMELIMIT = 3  # seconds
 
 
 def readInput(input_file):
@@ -99,7 +100,7 @@ def mainAll(is_visual, engine_list):
 
                 else:
                     engine_list[idx].printer.printRoad(idxMap=idx)
-                    print(engine_list[idx].printer.listKey)
+                    engine_list[idx].printer.printPressKey()
 
     except TimeoutException as ex:
         print(ex)
@@ -201,7 +202,7 @@ if __name__ == '__main__':
     for i in range(4):
         for j in range(34):
             return_dict["{i}-{j:02d}".format(i=i, j=j)] = None
-    
+
     mapMode = mapMode.split(sep="-")
     if len(mapMode) == 1:
         if mapMode != "all":
@@ -226,7 +227,7 @@ if __name__ == '__main__':
         if algorithm in ["DFS", "BFS", "ASTAR"]:
             thread = Process(target=do, args=(i, algorithm, return_dict))
             thread.start()
-            thread.join(timeout=3)
+            thread.join(timeout=TIMELIMIT)
             thread.terminate()
         elif algorithm == "BEST" and not isVisual:
             pass
@@ -240,7 +241,7 @@ if __name__ == '__main__':
             if listEngine[i] is None:
                 thread = Process(target=do, args=(i, "DFS", return_dict))
                 thread.start()
-                thread.join(timeout=3)
+                thread.join(timeout=TIMELIMIT + 60)
                 thread.terminate()
                 if return_dict["{i}-{j:02d}".format(i=1, j=i)] is None:
                     print("CAN'T SOLVE ALL")
