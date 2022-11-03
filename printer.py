@@ -52,18 +52,19 @@ class Printer:
             print("===============================")
         else:
             print()
-            print("========= ERROR MAP ===========\n")
+            print("=========== ERROR =============\n")
             self.printInitMap()
             print("===============================")
 
-    def printStat(self):
+    def printStat(self, idxMap):
         print()
-        print("============ STAT =============")
+        print("=========== STAT {num:02d} ============".format(num=idxMap))
         print("STATUS: " + str(self.stat.status))
         print("RUNNING TIME: " + str(self.stat.runningTime))
         print("REAL STEP: " + str(self.stat.countStep))
         print("VIRTUAL STEP: " + str(self.stat.virtualStep))
         print("===============================")
+        print()
 
     def pressListKey(self):
         for i in self.listKey:
@@ -86,11 +87,11 @@ class Printer:
                 time.sleep(0.6)
             time.sleep(0.05)
 
-    def doRoad(self):
+    def doRoad(self, idxMap):
         self.listKey = []
         self.stat.countStep = 0
         self.doRoadRev(self.endBlock)
-        self.printStat()
+        self.printStat(idxMap)
 
     def doRoadRev(self, currentBlock):
         if currentBlock is None:
@@ -105,22 +106,23 @@ class Printer:
             if block.keyPress:
                 listKeyPress = block.keyPress.split(", ")
                 self.listKey += listKeyPress
-                print(block.keyPress, end=" -- ")
-                block.printBlock()
+                # print(block.keyPress, end=" -- ")
+                # block.printBlock()
             else:
-                print("START", end=" -- ")
-                block.printBlock()
+                pass
+                # print("START", end=" -- ")
+                # block.printBlock()
         else:
             print()
-            print("========= ERROR MAP ===========\n")
+            print("=========== ERROR =============\n")
             self.printInitMap()
             print("===============================")
 
-    def printRoad(self):
+    def printRoad(self, idxMap):
         self.listKey = []
         self.stat.countStep = 0
         self.printRoadRev(self.endBlock)
-        self.printStat()
+        self.printStat(idxMap)
 
     def printRoadRev(self, currentBlock):
         if currentBlock is None:

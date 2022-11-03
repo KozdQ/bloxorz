@@ -56,6 +56,13 @@ class Engine:
             if currentMapSeq[bXCoord][bYCoord] == 0:
                 currentMapSeq[bXCoord][bYCoord] = 1
 
+        otherSeq = funcSeq[1 + 2 * funcSeq[0]:]
+        otherPair = len(otherSeq)//2
+        for i in range(otherPair):
+            bXCoord = funcSeq[2 * i + 1]
+            bYCoord = funcSeq[2 * i + 2]
+            currentMapSeq[bXCoord][bYCoord] = 0
+
     def doCloseButton(self, block, xCoord, yCoord):
         currentMapSeq = block.currentMap.mapSeq
         funcSeq = self.findFuncSeq(xCoord, yCoord)
@@ -64,6 +71,13 @@ class Engine:
             bYCoord = funcSeq[2 * i + 2]
             if currentMapSeq[bXCoord][bYCoord] == 1:
                 currentMapSeq[bXCoord][bYCoord] = 0
+
+        otherSeq = funcSeq[1 + 2 * funcSeq[0]:]
+        otherPair = len(otherSeq) // 2
+        for i in range(otherPair):
+            bXCoord = funcSeq[2 * i + 1]
+            bYCoord = funcSeq[2 * i + 2]
+            currentMapSeq[bXCoord][bYCoord] = 1
 
     def doSplit(self, block, xCoord, yCoord):
         funcSeq = self.findFuncSeq(xCoord, yCoord)

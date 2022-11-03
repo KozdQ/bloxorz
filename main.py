@@ -88,7 +88,7 @@ def mainAll(is_visual, engine_list):
             for idx in range(startMain, endMain + 1):
 
                 if is_visual:
-                    engine_list[idx].printer.doRoad()
+                    engine_list[idx].printer.doRoad(idxMap=idx)
 
                     engine_list[idx].printer.pressListKey()
 
@@ -98,7 +98,7 @@ def mainAll(is_visual, engine_list):
                         time.sleep(6)
 
                 else:
-                    engine_list[idx].printer.printRoad()
+                    engine_list[idx].printer.printRoad(idxMap=idx)
                     print(engine_list[idx].printer.listKey)
 
     except TimeoutException as ex:
