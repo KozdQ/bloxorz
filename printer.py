@@ -61,6 +61,7 @@ class Printer:
         print("=========== STAT {num:02d} ============".format(num=idxMap))
         print("STATUS: " + str(self.stat.status))
         print("PROCESS TIME: " + str(self.stat.runningTime))
+        print("PROCESS MEMORY: " + str(self.stat.processMemory))
         print("REAL STEP: " + str(self.stat.countStep))
         print("VIRTUAL STEP: " + str(self.stat.virtualStep))
         print("===============================")

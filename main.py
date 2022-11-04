@@ -3,6 +3,7 @@ import time
 from multiprocessing import Process, Manager
 
 import pyautogui as pyautogui
+from openpyxl import Workbook
 from selenium import webdriver
 from selenium.common import TimeoutException
 from selenium.webdriver.chrome.service import Service
@@ -18,7 +19,7 @@ from stat_info import Stat
 sys.setrecursionlimit(0x100000)
 
 START_MAP = 1
-END_MAP = 10
+END_MAP = 33
 TIMELIMIT = 3  # seconds
 
 
@@ -76,7 +77,7 @@ def mainAll(is_visual, engine_list):
                     pyautogui.click(912, 688)
                     time.sleep(6)
                 else:
-                    passCode = [idx for idx in open("passcode.txt").readlines()[START_MAP - 1][18:-1]]
+                    passCode = [idx for idx in open("passcode/passcode.txt").readlines()[START_MAP - 1][18:-1]]
 
                     pyautogui.click(607, 582)
                     time.sleep(1)
@@ -146,6 +147,8 @@ def oneEngine(idx, alg):
         engine.printer.stat = ASTARStat
         engine.PriorityDistanceFS()
 
+    engine.printer.stat.processMemory = engine.printer.stat.process.memory_info().rss - engine.printer.stat.startMemory
+
     return engine
 
 
@@ -185,17 +188,58 @@ def validate(alg, list_engine, s, e):
         algIdx = 3
     else:
         algIdx = 0
+    tmpBool = True
     for idx in range(s, e + 1):
         if list_engine[idx] is None:
             print("TIMEOUT at algIdx", algIdx, ", idx", idx)
-            return False
-    return True
+            tmpBool = False
+    return tmpBool
+
+
+def benchmarkFunc(alg, list_engine):
+    wb = Workbook()
+    dest_filename = 'dfs_benchmark.xlsx'
+    ws1 = wb.active
+    ws1.title = str(alg) + " benchmark"
+
+    # NAME
+    _ = ws1.cell(column=1, row=1, value="MAP")
+    _ = ws1.cell(column=1, row=2, value="STATUS")
+    _ = ws1.cell(column=1, row=3, value="START TIME")
+    _ = ws1.cell(column=1, row=4, value="PROCESS TIME")
+    _ = ws1.cell(column=1, row=5, value="REAL STEP")
+    _ = ws1.cell(column=1, row=6, value="VIRTUAL STEP")
+
+    for col in range(1, 34):
+        if list_engine[col]:
+            tmp = list_engine[col].printer.stat
+            status = tmp.status
+            startTime = tmp.startTime
+            runningTime = tmp.runningTime
+            countStep = tmp.countStep
+            virtualStep = tmp.virtualStep
+        else:
+            status = "FAIL"
+            startTime = "N/A"
+            runningTime = "N/A"
+            countStep = "N/A"
+            virtualStep = "N/A"
+
+        _ = ws1.cell(column=col + 1, row=1, value="{num:02d}".format(num=col))
+        _ = ws1.cell(column=col + 1, row=2, value="{s}".format(s=str(status)))
+        _ = ws1.cell(column=col + 1, row=3, value="{s}".format(s=str(startTime)))
+        _ = ws1.cell(column=col + 1, row=4, value="{s}".format(s=str(runningTime)))
+        _ = ws1.cell(column=col + 1, row=5, value="{s}".format(s=str(countStep)))
+        _ = ws1.cell(column=col + 1, row=6, value="{s}".format(s=str(virtualStep)))
+
+    wb.save(dest_filename)
 
 
 if __name__ == '__main__':
     mapMode = sys.argv[1]
     isVisual = (int(sys.argv[2]) == 1)
     algorithm = sys.argv[3]
+    benchmark = (int(sys.argv[4]) == 1)
 
     manager = Manager()
     return_dict = manager.dict()
@@ -205,7 +249,7 @@ if __name__ == '__main__':
 
     mapMode = mapMode.split(sep="-")
     if len(mapMode) == 1:
-        if mapMode != "all":
+        if mapMode[0] != "all":
             START_MAP = int(mapMode[0])
             END_MAP = START_MAP
 
@@ -233,20 +277,52 @@ if __name__ == '__main__':
             pass
 
     listEngine = getList(algorithm, return_dict)
-    if validate(algorithm, listEngine, start, end):
-        mainAll(isVisual, listEngine)
-    else:
-        print("Have NONE and replace with DFS")
+
+    ADD_TIME = 20
+    if benchmark:
+        ADD_TIME = 60
+
+    if not validate(algorithm, listEngine, start, end):
+        if benchmark:
+            print("NONE and retry")
+        else:
+            print("NONE, retry and maybe replace with DFS")
         for i in range(start, end + 1):
             if listEngine[i] is None:
-                thread = Process(target=do, args=(i, "DFS", return_dict))
-                thread.start()
-                thread.join(timeout=TIMELIMIT + 60)
-                thread.terminate()
-                if return_dict["{i}-{j:02d}".format(i=1, j=i)] is None:
-                    print("CAN'T SOLVE ALL")
-                    sys.exit()
+                if algorithm == "DFS":
+                    algorithmIdx = 1
+                elif algorithm == "BFS":
+                    algorithmIdx = 2
+                elif algorithm == "ASTAR":
+                    algorithmIdx = 3
                 else:
-                    listEngine[i] = return_dict["{i}-{j:02d}".format(i=1, j=i)]
+                    algorithmIdx = 0
+
+                # retry with 3 + ADD_TIME secs
+                thread = Process(target=do, args=(i, algorithm, return_dict))
+                thread.start()
+                thread.join(timeout=TIMELIMIT + ADD_TIME)
+                thread.terminate()
+
+                if return_dict["{i}-{j:02d}".format(i=algorithmIdx, j=i)] is None:
+                    print("Retry -> None")
+                    if not benchmark:
+                        print("Retry -> None -> Change algorithm to DFS")
+                        # replace algorithm with DFS in 3 + 60 secs
+                        thread = Process(target=do, args=(i, "DFS", return_dict))
+                        thread.start()
+                        thread.join(timeout=TIMELIMIT + 60)
+                        thread.terminate()
+
+                        if return_dict["{i}-{j:02d}".format(i=1, j=i)] is None:
+                            print("CAN'T SOLVE {num:02d}".format(num=i))
+                        else:
+                            listEngine[i] = return_dict["{i}-{j:02d}".format(i=1, j=i)]
+                else:
+                    listEngine[i] = return_dict["{i}-{j:02d}".format(i=algorithmIdx, j=i)]
+    if benchmark:
+        benchmarkFunc(algorithm, listEngine)
+        print("BENCHMARK " + str(algorithm))
+    else:
         mainAll(isVisual, listEngine)
     sys.exit()

@@ -8,15 +8,15 @@ Nhóm đã thực hiện chơi trò chơi trên trang web, sau đó đúc kết 
   - 0: Nơi không có viên gạch lát nền nào (trừ vị trí kết thúc)
   - 1: Nơi có viên gạch lát nền màu trắng
   - 2: Nơi có viên gạch lát nền màu cam 
-  - 3: Nơi có nút hình tròn (5)
-  - 4: Nơi có nút hình tròn (chỉ mở) (6)
-  - 5: Nơi có nút hình tròn (chỉ đóng) (4)
-  - 6: Nơi có nút X (3)
-  - 7: Nơi có nút X (chỉ mở) (8)
-  - 8: Nơi có nút vòng tròn (7)
-  - 9: Vị trí kết thúc (9)
-  - =: Vị trí khối gạch 1x1 nếu tiếp xúc với gạch lát trong khối gạch chính 1x2 
-    - (Nghĩa là nếu đứng sẽ là =, ngược lại, nếu nằm sẽ là ==)
+  - 3: Nơi có nút hình tròn
+  - 4: Nơi có nút hình tròn (chỉ mở)
+  - 5: Nơi có nút hình tròn (chỉ đóng)
+  - 6: Nơi có nút X
+  - 7: Nơi có nút X (chỉ mở)
+  - 8: Nơi có nút vòng tròn
+  - 9: Vị trí kết thúc
+  - *: Vị trí khối gạch 1x1 nếu tiếp xúc với gạch lát trong khối gạch chính 1x2 
+    - (Nghĩa là nếu đứng sẽ là *, ngược lại, nếu nằm sẽ là **)
 
 Từ đó, quy ước về input cho các level, sẽ như sau:
 
