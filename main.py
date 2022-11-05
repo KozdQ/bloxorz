@@ -134,10 +134,10 @@ def oneEngine(idx, alg):
         DFSStat.startMemory = process_memory()
     elif alg == "BFS":
         BFSStat = Stat("BFS Stat")
-        BFSStat.startMemory = 0
+        BFSStat.startMemory = process_memory()
     elif alg == "ASTAR":
         ASTARStat = Stat("ASTAR Stat")
-        ASTARStat.startMemory = 0
+        ASTARStat.startMemory = process_memory()
 
     # SET MAP
     srcMap = Map(mapSeq, mapRow, mapCol)
