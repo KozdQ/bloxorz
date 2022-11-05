@@ -12,15 +12,15 @@ class Stat:
         self.virtualStep = 0
         self.startTime = datetime.now()
         self.runningTime = 0
-        self.process = psutil.Process(os.getpid())
-        self.startMemory = self.process.memory_info().rss
+        self.startMemory = 0
         self.processMemory = 0
 
     def printStat(self, index):
         print()
-        print("===== " + self.name + " {num:02d}".format(num=index) + " ======")
+        print("====== STAT {num:02d}".format(num=index) + " =======")
         print("STATUS: " + str(self.status))
-        print("RUNNING TIME: " + str(self.runningTime))
+        print("PROCESS TIME: " + str(self.runningTime))
+        print("PROCESS MEMORY: " + str(self.processMemory))
         print("REAL STEP: " + str(self.countStep))
         print("VIRTUAL STEP: " + str(self.virtualStep))
         print("===============================")

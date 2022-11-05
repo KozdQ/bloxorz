@@ -1,7 +1,9 @@
+import os
 import sys
 import time
 from multiprocessing import Process, Manager
 
+import psutil
 import pyautogui as pyautogui
 from openpyxl import Workbook
 from selenium import webdriver
@@ -21,6 +23,7 @@ sys.setrecursionlimit(0x100000)
 START_MAP = 1
 END_MAP = 33
 TIMELIMIT = 3  # seconds
+STAT_CMD_MODE = False
 
 
 def readInput(input_file):
@@ -100,14 +103,23 @@ def mainAll(is_visual, engine_list):
                         time.sleep(6)
 
                 else:
-                    engine_list[idx].printer.printRoad(idxMap=idx)
-                    engine_list[idx].printer.printPressKey()
+                    if STAT_CMD_MODE:
+                        engine_list[idx].printer.stat.printStat(idx)
+                    else:
+                        engine_list[idx].printer.printRoad(idxMap=idx)
+                        engine_list[idx].printer.printPressKey()
 
     except TimeoutException as ex:
         print(ex)
     finally:
         if is_visual:
             driver.quit()
+
+
+def process_memory():
+    process = psutil.Process(os.getpid())
+    mem_info = process.memory_info()
+    return mem_info.rss
 
 
 def oneEngine(idx, alg):
@@ -119,10 +131,13 @@ def oneEngine(idx, alg):
     DFSStat, BFSStat, ASTARStat = None, None, None
     if alg == "DFS":
         DFSStat = Stat("DFS Stat")
+        DFSStat.startMemory = process_memory()
     elif alg == "BFS":
         BFSStat = Stat("BFS Stat")
+        BFSStat.startMemory = 0
     elif alg == "ASTAR":
         ASTARStat = Stat("ASTAR Stat")
+        ASTARStat.startMemory = 0
 
     # SET MAP
     srcMap = Map(mapSeq, mapRow, mapCol)
@@ -147,7 +162,7 @@ def oneEngine(idx, alg):
         engine.printer.stat = ASTARStat
         engine.PriorityDistanceFS()
 
-    engine.printer.stat.processMemory = engine.printer.stat.process.memory_info().rss - engine.printer.stat.startMemory
+    engine.printer.stat.processMemory = process_memory() - engine.printer.stat.startMemory
 
     return engine
 
@@ -198,7 +213,7 @@ def validate(alg, list_engine, s, e):
 
 def benchmarkFunc(alg, list_engine):
     wb = Workbook()
-    dest_filename = 'dfs_benchmark.xlsx'
+    dest_filename = str(alg).lower() + '_benchmark.xlsx'
     ws1 = wb.active
     ws1.title = str(alg) + " benchmark"
 
@@ -209,6 +224,7 @@ def benchmarkFunc(alg, list_engine):
     _ = ws1.cell(column=1, row=4, value="PROCESS TIME")
     _ = ws1.cell(column=1, row=5, value="REAL STEP")
     _ = ws1.cell(column=1, row=6, value="VIRTUAL STEP")
+    _ = ws1.cell(column=1, row=7, value="PROCESS MEMORY")
 
     for col in range(1, 34):
         if list_engine[col]:
@@ -218,12 +234,14 @@ def benchmarkFunc(alg, list_engine):
             runningTime = tmp.runningTime
             countStep = tmp.countStep
             virtualStep = tmp.virtualStep
+            processMemory = tmp.processMemory
         else:
             status = "FAIL"
             startTime = "N/A"
             runningTime = "N/A"
             countStep = "N/A"
             virtualStep = "N/A"
+            processMemory = "N/A"
 
         _ = ws1.cell(column=col + 1, row=1, value="{num:02d}".format(num=col))
         _ = ws1.cell(column=col + 1, row=2, value="{s}".format(s=str(status)))
@@ -231,6 +249,7 @@ def benchmarkFunc(alg, list_engine):
         _ = ws1.cell(column=col + 1, row=4, value="{s}".format(s=str(runningTime)))
         _ = ws1.cell(column=col + 1, row=5, value="{s}".format(s=str(countStep)))
         _ = ws1.cell(column=col + 1, row=6, value="{s}".format(s=str(virtualStep)))
+        _ = ws1.cell(column=col + 1, row=7, value="{s}".format(s=str(processMemory)))
 
     wb.save(dest_filename)
 
@@ -240,6 +259,7 @@ if __name__ == '__main__':
     isVisual = (int(sys.argv[2]) == 1)
     algorithm = sys.argv[3]
     benchmark = (int(sys.argv[4]) == 1)
+    STAT_CMD_MODE = (int(sys.argv[5]) == 1)
 
     manager = Manager()
     return_dict = manager.dict()
@@ -305,9 +325,9 @@ if __name__ == '__main__':
                 thread.terminate()
 
                 if return_dict["{i}-{j:02d}".format(i=algorithmIdx, j=i)] is None:
-                    print("Retry -> None")
+                    print("Retry {num:02d} -> None".format(num=i))
                     if not benchmark:
-                        print("Retry -> None -> Change algorithm to DFS")
+                        print("Retry {num:02d} -> None -> Change algorithm to DFS".format(num=i))
                         # replace algorithm with DFS in 3 + 60 secs
                         thread = Process(target=do, args=(i, "DFS", return_dict))
                         thread.start()
@@ -315,10 +335,12 @@ if __name__ == '__main__':
                         thread.terminate()
 
                         if return_dict["{i}-{j:02d}".format(i=1, j=i)] is None:
-                            print("CAN'T SOLVE {num:02d}".format(num=i))
+                            print("Retry {num:02d} -> None -> Change algorithm to DFS -> None".format(num=i))
                         else:
+                            print("Retry {num:02d} -> None -> Change algorithm to DFS -> Success".format(num=i))
                             listEngine[i] = return_dict["{i}-{j:02d}".format(i=1, j=i)]
                 else:
+                    print("Retry {num:02d} -> Success".format(num=i))
                     listEngine[i] = return_dict["{i}-{j:02d}".format(i=algorithmIdx, j=i)]
     if benchmark:
         benchmarkFunc(algorithm, listEngine)
