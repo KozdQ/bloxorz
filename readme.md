@@ -1,5 +1,49 @@
 ## Bài toán: BLOXORZ
 
+## Cách chạy chương trình
+
+
+```
+  Usage: command line
+  python3 main.py <mapMode: num | num-num | all> <isVisual: 0 | 1> <algorithm: DFS | BFS | ASTAR> <benchmark: 0 | 1> <stat: 0 | 1> 
+```
+
+Ví dụ 
+
+- Chạy map 01, giải thuật DFS, không benchmark, không stat mode -> output text
+```commandline
+    python3 main.py 01 0 DFS 0 0
+```
+
+- Chạy map 02 đến map 08, giải thuật DFS, không benchmark, không stat mode -> output text
+```commandline
+    python3 main.py 1-8 0 DFS 0 0
+```
+
+- Chạy 33 map, giải thuật DFS, không benchmark, không stat mode -> output text
+```commandline
+    python3 main.py all 0 DFS 0 0
+```
+
+
+- Xem cách chơi game map 1 trên web bằng giải thuật DFS
+  - NOTE: do xác định bằng toạ độ pointer để click màn hình nên chạy được trên máy sinh viên code, nhưng không chắc chạy được trên máy của người khác vì độ phân giải màn hình khác nhau.
+```commandline
+    python3 main.py 01 1 DFS 0 0
+```
+  - Tương tự với "**1-8**" và "**all**" (không khuyến khích chơi hết map sẽ chạy khá lâu)
+
+- Gen file benchmark cho giải thuật DFS -> excel file
+```commandline
+    python3 main.py all 0 DFS 1 0
+```
+
+- Chỉ đọc thông số so sánh giữa các map trên giải thuật DFS
+```commandline
+    python3 main.py all 0 DFS 0 1
+```
+
+
 ### Quy ước về input
 Nhóm đã thực hiện chơi trò chơi trên trang web, sau đó đúc kết lại được:
 - Trò chơi có chính xác 33 màn
